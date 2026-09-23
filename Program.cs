@@ -64,6 +64,8 @@ class Program
         float moveSpeed = 0.05f;
         float rotSpeed = 0.03f;
         float mouseSens = 0.002f;
+        float shotTimer = 0f;
+        float shotDuration = 0.08f;
 
         int screenWidth = Raylib.GetScreenWidth();
         int screenHeight = Raylib.GetScreenHeight();
@@ -132,6 +134,11 @@ class Program
             if(Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
                 TryShoot(posX, posY, dirX, dirY, planeX, planeY, zBuffer[screenWidth / 2], enemies);
+                shotTimer = shotDuration;
+            }
+            if (shotTimer > 0f)
+            {
+                shotTimer -= Raylib.GetFrameTime();
             }
             //drawing
             Raylib.BeginDrawing();
@@ -221,11 +228,22 @@ class Program
             Raylib.DrawLine(screenWidth / 2 - 8, halfHeight, screenWidth / 2 + 8, halfHeight, Color.White);
             Raylib.DrawLine(screenWidth / 2, halfHeight - 8, screenWidth / 2, halfHeight + 8, Color.White);
 
+            if (shotTimer > 0f)
+            {
+                float alpha = shotTimer / shotDuration;
+                byte a = (byte)(alpha * 255);
+                Raylib.DrawCircle(screenWidth / 2, halfHeight, 40, new Color((byte)255, (byte)220, (byte)100, a));
+                Raylib.DrawLine(screenWidth / 2 - 60, halfHeight, screenWidth / 2 + 60, halfHeight, new Color((byte)255, (byte)255, (byte)200, a));
+                Raylib.DrawLine(screenWidth / 2, halfHeight - 60, screenWidth / 2, halfHeight + 60, new Color((byte)255, (byte)255, (byte)200, a));
+            }
+
             Raylib.EndDrawing();
         }
             Raylib.CloseWindow();
          //draw enemies function
-         static void DrawEnemies(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float[] zBuffer, List<Enemy> enemies)
+           
+    }
+     static void DrawEnemies(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float[] zBuffer, List<Enemy> enemies)
         {
             int screenW = Raylib.GetScreenWidth();
             int screenH = Raylib.GetScreenHeight();
@@ -321,6 +339,5 @@ class Program
               px + (int)(dirX * scale * 3),
               py + (int)(dirY * scale * 3),
               Color.Yellow);      
-        }   
-    }
+        }
 }
