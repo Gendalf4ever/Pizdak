@@ -68,7 +68,7 @@ class Program
         float shotDuration = 0.08f;
 
         int screenWidth = Raylib.GetScreenWidth();
-        int screenHeight = Raylib.GetScreenHeight();
+        int screenHeight = Raylib.GetScreenHeight() - Hud.Height;
         int halfHeight = screenHeight / 2;
         //z-buffer
 
@@ -133,8 +133,12 @@ class Program
             //shooting
             if(Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
-                TryShoot(posX, posY, dirX, dirY, planeX, planeY, zBuffer[screenWidth / 2], enemies);
-                shotTimer = shotDuration;
+                if (Hud.Ammo > 0)
+                {
+                    Hud.Ammo --;
+                    TryShoot(posX, posY, dirX, dirY, planeX, planeY, zBuffer[screenWidth / 2], enemies);
+                    shotTimer = shotDuration;
+                }
             }
             if (shotTimer > 0f)
             {
@@ -236,7 +240,8 @@ class Program
                 Raylib.DrawLine(screenWidth / 2 - 60, halfHeight, screenWidth / 2 + 60, halfHeight, new Color((byte)255, (byte)255, (byte)200, a));
                 Raylib.DrawLine(screenWidth / 2, halfHeight - 60, screenWidth / 2, halfHeight + 60, new Color((byte)255, (byte)255, (byte)200, a));
             }
-
+            //Hud
+            Hud.Draw();
             Raylib.EndDrawing();
         }
             Raylib.CloseWindow();
