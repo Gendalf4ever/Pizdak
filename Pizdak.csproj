@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Raylib-cs" Version="8.1.0" />
+    <None Update="png\pizdak\pizdak-face.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="png\pizdak\pizdak-hurt.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="png\pizdak\pizdak-dead.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

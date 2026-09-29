@@ -47,6 +47,7 @@ class Program
     static void Main()
     {
         Raylib.InitWindow(1280,720, "Game");
+        Hud.Load();
         Raylib.SetTargetFPS(60);
         Raylib.DisableCursor();
 
@@ -244,6 +245,7 @@ class Program
             Hud.Draw();
             Raylib.EndDrawing();
         }
+            Hud.Unload();
             Raylib.CloseWindow();
          //draw enemies function
            
