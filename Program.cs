@@ -99,10 +99,26 @@ class Program
          AttackRange = 0.7f,
          AttackCooldown = 0.5f   
         });
+        bool isDead = false;
         while(!Raylib.WindowShouldClose())
         {
-            
-            //Turn angle
+            //check if player is alive
+            if (Hud.Health <= 0) isDead = true;
+            if(isDead && Raylib.IsKeyPressed(KeyboardKey.R))
+            {
+                Hud.Health = 100;
+                Hud.Ammo = 50;
+                posX = 12.0f;
+                posY = 12.0f;
+                dirX = 1.0f;
+                dirY = 0.0f;
+                planeX = 0.0f;
+                planeY = 0.66f;
+                isDead = false;
+            }
+            if (!isDead)
+            {
+                 //Turn angle
             float angle = 0;
             if (Raylib.IsKeyDown(KeyboardKey.Left)) angle -= rotSpeed;
             if (Raylib.IsKeyDown(KeyboardKey.Right)) angle += rotSpeed;
@@ -181,6 +197,7 @@ class Program
             if (shotTimer > 0f)
             {
                 shotTimer -= Raylib.GetFrameTime();
+            }
             }
             //drawing
             Raylib.BeginDrawing();
@@ -280,6 +297,8 @@ class Program
             }
             //Hud
             Hud.Draw();
+            //death screen
+            if (isDead) DrawDeathScreen();
             Raylib.EndDrawing();
         }
             Hud.Unload();
@@ -383,4 +402,22 @@ class Program
               py + (int)(dirY * scale * 3),
               Color.Yellow);      
         }
+        //death screen
+        static void DrawDeathScreen()
+    {
+        int sw = Raylib.GetScreenWidth();
+        int sh = Raylib.GetScreenHeight() - Hud.Height;
+
+        Raylib.DrawRectangle(0, 0, sw, sh, new Color((byte)120, (byte)0, (byte)0, (byte)140));
+        //dark souls reference xd
+        string deathText = "YOU DIED";
+        int fontSize = 60;
+        int textW = Raylib.MeasureText(deathText, fontSize);
+        Raylib.DrawText(deathText, (sw-textW) / 2, sh / 2 - 80, fontSize, Color.Black);
+
+        string hint = "Press R to restart";
+        int hintSize = 24;
+        int hintW = Raylib.MeasureText(hint, hintSize);
+        Raylib.DrawText(hint, (sw - hintW) / 2, sh / 2 + 20, hintSize, Color.White);
+    }
 }
