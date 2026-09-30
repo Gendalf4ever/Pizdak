@@ -36,14 +36,6 @@ class Program
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
     };
     //далее добавлю массив с другими картами
-    //enemy
-
-    class Enemy
-    {
-        public float X;
-        public float Y;
-        public bool Alive = true;        
-    }
     static void Main()
     {
         Raylib.InitWindow(1280,720, "Game");
@@ -76,17 +68,50 @@ class Program
         float[] zBuffer = new float[screenWidth];
 
         List<Enemy> enemies = new List<Enemy>();
-        enemies.Add(new Enemy { X = 7.5f,  Y = 7.5f  });
-        enemies.Add(new Enemy { X = 12.5f, Y = 4.5f  });
-        enemies.Add(new Enemy { X = 18.5f, Y = 15.5f });
-        
+        //default enemy
+        enemies.Add(new Enemy
+        {
+         X = 7.5f, Y = 7.5f,
+         Health = 30, MaxHealth = 30,
+         Speed = 0.02f,
+         Damage = 5,
+         AttackRange = 0.8f,
+         AttackCooldown = 1.0f   
+        });
+        //tank enemy
+        enemies.Add(new Enemy
+        {
+         X = 12.5f, Y = 4.5f,
+         Health = 100, MaxHealth = 100,
+         Speed = 0.008f,
+         Damage = 20,
+         AttackRange = 0.8f,
+         AttackCooldown = 1.5f,
+         bodyColor = new Color((byte)120, (byte)30, (byte)30, (byte)255)   
+        });
+        //speed enemy
+        enemies.Add(new Enemy
+        {
+         X = 18.5f, Y = 15.5f,
+         Health = 15, MaxHealth = 15,
+         Speed = 0.04f,
+         Damage = 3,
+         AttackRange = 0.7f,
+         AttackCooldown = 0.5f   
+        });
         while(!Raylib.WindowShouldClose())
         {
+            
             //Turn angle
             float angle = 0;
             if (Raylib.IsKeyDown(KeyboardKey.Left)) angle -= rotSpeed;
             if (Raylib.IsKeyDown(KeyboardKey.Right)) angle += rotSpeed;
-
+            /*
+            if (Raylib.IsKeyPressed(KeyboardKey.One))   Hud.Health = 100;  
+            if (Raylib.IsKeyPressed(KeyboardKey.Two))   Hud.Health = 40;   
+            if (Raylib.IsKeyPressed(KeyboardKey.Three)) Hud.Health = 0;    
+            if (Raylib.IsKeyPressed(KeyboardKey.Four))  Hud.Health = 25;   
+            */
             Vector2 mouseDelta = Raylib.GetMouseDelta();
             angle += mouseDelta.X * mouseSens;
 
@@ -131,6 +156,18 @@ class Program
 
             if (map[(int)newX, (int)posY] == 0) posX = newX;
             if (map[(int)posX, (int)newY] == 0) posY = newY;
+            //enemy update
+            float dt = Raylib.GetFrameTime(); 
+            foreach (var e in enemies)
+            {
+                bool attacking = e.Update(posX, posY, map, dt);
+                if (attacking)
+                {
+                    Hud.Health -= e.Damage;
+                    if (Hud.Health < 0) Hud.Health = 0;
+                    Console.WriteLine($"Урон {e.Damage}  Здоровье {Hud.Health}");
+                }
+            }
             //shooting
             if(Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
@@ -247,9 +284,8 @@ class Program
         }
             Hud.Unload();
             Raylib.CloseWindow();
-         //draw enemies function
-           
     }
+    //draw enemies function
      static void DrawEnemies(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float[] zBuffer, List<Enemy> enemies)
         {
             int screenW = Raylib.GetScreenWidth();
@@ -286,7 +322,7 @@ class Program
                     if (x < 0 || x >= screenW) continue;
                     if (transformY >= zBuffer[x]) continue;
 
-                    Raylib.DrawRectangle(x, drawStartY, 1, drawEndY - drawStartY, Color.Red);
+                    Raylib.DrawRectangle(x, drawStartY, 1, drawEndY - drawStartY, e.bodyColor);
                 }
             }
         }
@@ -294,7 +330,7 @@ class Program
             static void TryShoot(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float wallDist, List<Enemy> enemies)
         {
             float invDet = 1.0f / (planeX * dirY - dirX * planeY);
-            Enemy closest = null;
+            Enemy? closest = null;
             float closestDist = float.MaxValue;
 
             foreach(var e in enemies)
@@ -319,8 +355,8 @@ class Program
 
             if (closest != null)
             {
-                closest.Alive = false;
-                Console.WriteLine("Hit detected");
+                bool died = closest.TakeDamage(10);
+                Console.WriteLine(died ? "противник убит" : $"попадание, HP: {closest.Health}");
             }
 
         }
