@@ -187,13 +187,25 @@ class Program
             //shooting
             if(Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
-                if (Hud.Ammo > 0)
-                {
-                    Hud.Ammo --;
-                    TryShoot(posX, posY, dirX, dirY, planeX, planeY, zBuffer[screenWidth / 2], enemies);
-                    shotTimer = shotDuration;
-                }
+               Weapon weapon = Hud.CurrentWeapon;
+               if (weapon.TryFire(out int damage))
+                    {
+                        Enemy? hit = FindEnemyInCrosshair(posX, posY, dirX, dirY, planeX, planeY, zBuffer[screenWidth / 2], enemies);
+                        if (hit != null)
+                        {
+                            bool died = hit.TakeDamage(damage);
+                        }
+                        shotTimer = shotDuration; 
+                    }
             }
+            if (Raylib.IsKeyPressed(KeyboardKey.One)) Hud.CurrentWeaponIndex = 0;
+            if (Raylib.IsKeyPressed(KeyboardKey.Two)) Hud.CurrentWeaponIndex = 1;
+            if (Raylib.IsKeyPressed(KeyboardKey.Three)) Hud.CurrentWeaponIndex = 2;
+
+            //reload
+            if (Raylib.IsKeyPressed(KeyboardKey.R)) Hud.CurrentWeapon.StartReload();
+
+            Hud.CurrentWeapon.Update(Raylib.GetFrameTime());
             if (shotTimer > 0f)
             {
                 shotTimer -= Raylib.GetFrameTime();
@@ -345,40 +357,33 @@ class Program
                 }
             }
         }
-        //try shoot function
-            static void TryShoot(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float wallDist, List<Enemy> enemies)
+        //find enemy in crosshair function
+           static Enemy? FindEnemyInCrosshair(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float wallDist, List<Enemy> enemies)
+    {
+        float invDet = 1.0f / (planeX * dirY - dirX * planeY);
+        Enemy? closest = null;
+        float closestDist = float.MaxValue;
+        foreach (var e in enemies)
         {
-            float invDet = 1.0f / (planeX * dirY - dirX * planeY);
-            Enemy? closest = null;
-            float closestDist = float.MaxValue;
+            if (!e.Alive) continue;
+            float dx = e.X - posX;
+            float dy = e.Y - posY;
 
-            foreach(var e in enemies)
+            float transformX = invDet * (dirY * dx - dirX * dy);
+            float transformY = invDet * (-planeY * dx + planeX * dy);
+
+            if (transformY <= 0) continue;
+            if (transformY >= wallDist) continue;
+            if (Math.Abs(transformX) > 0.4f) continue;
+
+            if (transformY < closestDist)
             {
-                if (!e.Alive) continue;
-                float dx = e.X - posX;
-                float dy = e.Y - posY;
-
-                float transformX = invDet * (dirY * dx - dirX * dy);
-                float transformY = invDet * (-planeY * dx + planeX * dy);
-
-                if (transformY <=0 ) continue; //behind the player
-                if (transformY >= wallDist) continue; //behind the wall
-                if (Math.Abs(transformX) > 0.4f) continue; //not in crosshair
-
-                if (transformY < closestDist)
-                {
-                    closestDist = transformY;
-                    closest = e;
-                }
+                closestDist = transformY;
+                closest = e;
             }
-
-            if (closest != null)
-            {
-                bool died = closest.TakeDamage(10);
-                Console.WriteLine(died ? "противник убит" : $"попадание, HP: {closest.Health}");
-            }
-
         }
+        return closest;
+    }
          //minimap function
          static void DrawMinimap(float posX, float posY, float dirX, float dirY)
         {

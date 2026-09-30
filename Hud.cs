@@ -9,7 +9,9 @@ public static int Health = 100;
 public static int Armor = 0;
 public static int Ammo = 50;
 public static int MaxAmmo = 200;
-public static int CurrentWeapon = 1; //1 - pistol 2 - shotgun 3 - assault rifle
+public static List<Weapon> Weapons = new List<Weapon>();
+public static int CurrentWeaponIndex = 0;
+public static Weapon CurrentWeapon => Weapons[CurrentWeaponIndex];
 //pizdak textures
 static Texture2D _faceNormal;
 static Texture2D _faceHurt;
@@ -24,6 +26,8 @@ public static void Load()
         Raylib.SetTextureFilter(_faceNormal, TextureFilter.Point);
         Raylib.SetTextureFilter(_faceHurt, TextureFilter.Point);
         Raylib.SetTextureFilter(_faceDead, TextureFilter.Point);
+
+        LoadWepons();
     }
 
     public static void Unload()
@@ -129,7 +133,7 @@ public static void Draw()
     {
         int slotSize = 40;
         int slotGap = 5;
-        int totalSlots = 3;
+        int totalSlots = Weapons.Count;
         int totalWidth = totalSlots * slotSize + (totalSlots - 1) * slotGap;
         int startX = screenW - totalWidth - 20;
         int y = panelY + (panelHeight - slotSize) / 2;
@@ -139,7 +143,7 @@ public static void Draw()
             int x = startX + (i - 1) * (slotSize + slotGap);
             
             //slot background
-            Color BackGround = (i == CurrentWeapon)
+            Color BackGround = (i == CurrentWeaponIndex)
             ? new Color((byte)180, (byte)180, (byte)60, (byte)255)
             : new Color((byte)40, (byte)40, (byte)40, (byte)255);
 
@@ -149,7 +153,30 @@ public static void Draw()
             string num = i.ToString();
             int numW = Raylib.MeasureText(num, 20);
             Raylib.DrawText(num, x + (slotSize - numW) / 2, y + slotSize / 2 - 12, 20,
-            (i == CurrentWeapon) ? Color.Black : Color.LightGray);
+            (i == CurrentWeaponIndex) ? Color.Black : Color.LightGray);
         }
+    }
+    //load wepons
+    public static void LoadWepons()
+    {
+        Weapons.Clear();
+        //pistol
+        Weapons.Add(new Weapon(
+            name: "Pistol",
+            damage: 1,
+            magazineSize: 10,
+            reloadTime: 1.5f,
+            ammoPerShot: 1,
+            fireRate:1
+        ));
+        //shotgun
+        Weapons.Add(new Weapon(
+            name: "Shotgun",
+            damage: 10,
+            magazineSize: 5,
+            reloadTime: 2.0f,
+            ammoPerShot: 3,
+            fireRate: 0.8f
+        ));
     }
 } 
