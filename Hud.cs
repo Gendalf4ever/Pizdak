@@ -143,7 +143,7 @@ public static void Draw()
             int x = startX + (i - 1) * (slotSize + slotGap);
             
             //slot background
-            Color BackGround = (i == CurrentWeaponIndex)
+            Color BackGround = ((i - 1) == CurrentWeaponIndex)
             ? new Color((byte)180, (byte)180, (byte)60, (byte)255)
             : new Color((byte)40, (byte)40, (byte)40, (byte)255);
 
@@ -153,7 +153,7 @@ public static void Draw()
             string num = i.ToString();
             int numW = Raylib.MeasureText(num, 20);
             Raylib.DrawText(num, x + (slotSize - numW) / 2, y + slotSize / 2 - 12, 20,
-            (i == CurrentWeaponIndex) ? Color.Black : Color.LightGray);
+            ((i - 1) == CurrentWeaponIndex) ? Color.Black : Color.LightGray);
         }
     }
     //load wepons
@@ -169,6 +169,7 @@ public static void Draw()
             ammoPerShot: 1,
             fireRate:1
         ));
+        Weapons[0].Owned = true;
         //shotgun
         Weapons.Add(new Weapon(
             name: "Shotgun",
@@ -178,5 +179,6 @@ public static void Draw()
             ammoPerShot: 3,
             fireRate: 0.8f
         ));
+         Weapons[1].Owned = true;
     }
 } 

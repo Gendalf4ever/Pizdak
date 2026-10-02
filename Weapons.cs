@@ -13,7 +13,7 @@ class Weapon
     public float ReloadTimer;
     public float FireCooldown;
     public float FireRate;
-
+    public bool Owned = false; //if player has weapon
     //weapon construct
     public Weapon(string name, int damage, int magazineSize, float reloadTime, int ammoPerShot, float fireRate)
     {
@@ -25,6 +25,7 @@ class Weapon
         FireRate = fireRate;
 
         AmmoInMagazine = magazineSize;
+        Owned = false;
     }
 
     public bool CanShoot()
@@ -38,7 +39,7 @@ class Weapon
 
     public void Update(float deltaTime)
     {
-        if(ReloadTime > 0f)
+        if(ReloadTimer > 0f)
         {
             ReloadTimer -= deltaTime;
             if (ReloadTimer <= 0f)
@@ -58,7 +59,7 @@ class Weapon
         AmmoInMagazine--;
         Hud.Ammo -= AmmoPerShot;
         FireCooldown = FireRate;
-        damage = Damage * 1;
+        damage = Damage;
         if (AmmoInMagazine <= 0)
         {
             ReloadTimer = ReloadTime;

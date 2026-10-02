@@ -198,9 +198,9 @@ class Program
                         shotTimer = shotDuration; 
                     }
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.One)) Hud.CurrentWeaponIndex = 0;
-            if (Raylib.IsKeyPressed(KeyboardKey.Two)) Hud.CurrentWeaponIndex = 1;
-            if (Raylib.IsKeyPressed(KeyboardKey.Three)) Hud.CurrentWeaponIndex = 2;
+            if (Raylib.IsKeyPressed(KeyboardKey.One)) TrySwitchWeapon(0);
+            if (Raylib.IsKeyPressed(KeyboardKey.Two)) TrySwitchWeapon(1);
+            if (Raylib.IsKeyPressed(KeyboardKey.Three)) TrySwitchWeapon(2);
 
             //reload
             if (Raylib.IsKeyPressed(KeyboardKey.R)) Hud.CurrentWeapon.StartReload();
@@ -407,6 +407,13 @@ class Program
               py + (int)(dirY * scale * 3),
               Color.Yellow);      
         }
+        //Try Switch Weapon
+        static void TrySwitchWeapon(int index)
+    {
+        if (index < 0 || index >= Hud.Weapons.Count) return;
+        if (!Hud.Weapons[index].Owned) return;
+        Hud.CurrentWeaponIndex = index;
+    }
         //death screen
         static void DrawDeathScreen()
     {
