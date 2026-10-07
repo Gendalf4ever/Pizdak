@@ -68,6 +68,7 @@ class Program
         float[] zBuffer = new float[screenWidth];
 
         List<Enemy> enemies = new List<Enemy>();
+        List<Pickup> pickups = CreatePickups();
         //default enemy
         enemies.Add(new Enemy
         {
@@ -184,6 +185,21 @@ class Program
                     Console.WriteLine($"Урон {e.Damage}  Здоровье {Hud.Health}");
                 }
             }
+               //pickups
+            foreach (var p in pickups)
+                {
+            if (p.Taken) continue;
+            float dx = p.X - posX;
+            float dy = p.Y - posY;
+            float dist = MathF.Sqrt(dx * dx + dy* dy);
+            if (dist < 0.5f)
+            {
+                if (p.Apply())
+                {
+                    Console.WriteLine($"Подобрано: {p.Type} +{p.Amount}");
+                }
+            }
+                 }
             //shooting
             if(Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
@@ -292,6 +308,8 @@ class Program
             }
             //enemies
             DrawEnemies(posX, posY, dirX, dirY, planeX, planeY, zBuffer, enemies);
+           //pickups
+            DrawPickups(posX, posY, dirX, dirY, planeX, planeY, zBuffer, pickups);
             //Minimap
             DrawMinimap(posX, posY, dirX, dirY);
 
@@ -355,8 +373,53 @@ class Program
 
                     Raylib.DrawRectangle(x, drawStartY, 1, drawEndY - drawStartY, e.bodyColor);
                 }
-            }
+            }   
         }
+
+        //draw pickups function
+        static void DrawPickups(float posX, float posY, float dirX, float dirY,
+        float planeX, float planeY, float[] zBuffer, List<Pickup> pickups)
+            {
+                int screenW = Raylib.GetScreenWidth();
+                int screenH = Raylib.GetScreenHeight() - Hud.Height;
+                int halfH = screenH / 2;
+                float invDet = 1.0f / (planeX * dirY - dirX * planeY);
+                foreach (var p in pickups)
+                {
+                    if (p.Taken) continue;
+                    float dx = p.X - posX;
+                    float dy = p.Y - posY;
+
+                    float transformX = invDet * (dirY * dx - dirX * dy);
+                    float transformY = invDet * (-planeY * dx + planeX * dy);
+
+                    if (transformY <= 0.01f) continue;
+
+                    int spriteScreenX = (int)((screenW / 2) * (1 + transformX / transformY));
+
+                    //pickups height and width
+                    int spriteHeight = Math.Abs((int)(screenH / transformY)) / 2;
+                    int spriteWidth = spriteHeight;
+                    //pickups on the floor
+                    int floorOffset = (int)(screenH / transformY) / 4;
+                   
+                    int drawStartY = -spriteHeight / 2 + halfH + floorOffset;
+                    int drawEndY = spriteHeight / 2 + halfH + floorOffset;
+                    int drawStartX = -spriteWidth / 2 + spriteScreenX;
+                    int drawEndX = spriteWidth / 2 + spriteScreenX;
+
+                    if (drawStartY < 0) drawStartY = 0;
+                    if (drawEndY >= screenH) drawEndY = screenH - 1;
+
+                    for (int x = drawStartX; x < drawEndX; x++)
+                    {
+                        if (x < 0 || x>= screenW) continue;
+                        if (transformY >= zBuffer[x]) continue;
+
+                        Raylib.DrawRectangle(x, drawStartY, 1, drawEndY - drawStartY, p.BodyColor);
+                    }
+                }
+            }
         //find enemy in crosshair function
            static Enemy? FindEnemyInCrosshair(float posX, float posY, float dirX, float dirY, float planeX, float planeY, float wallDist, List<Enemy> enemies)
     {
@@ -413,6 +476,24 @@ class Program
         if (index < 0 || index >= Hud.Weapons.Count) return;
         if (!Hud.Weapons[index].Owned) return;
         Hud.CurrentWeaponIndex = index;
+    }
+        //pickup method
+        static List<Pickup> CreatePickups()
+    {
+        List<Pickup> pickups = new List<Pickup>();
+
+        //ammo
+        pickups.Add(new Pickup(PickupType.Ammo, 7.5f, 12.5f, 25));
+        pickups.Add(new Pickup(PickupType.Ammo, 20.5f, 3.5f, 25));
+        pickups.Add(new Pickup(PickupType.Ammo, 15.5f, 18.5f, 50));
+        //hp
+        pickups.Add(new Pickup(PickupType.Health, 3.5f, 3.5f, 20));
+        pickups.Add(new Pickup(PickupType.Health, 22.5f, 20.5f, 25));
+        pickups.Add(new Pickup(PickupType.Health, 19.5f, 8.5f, 15));
+        //armor
+        pickups.Add(new Pickup(PickupType.Armor, 5.5f, 20.5f, 15));
+        pickups.Add(new Pickup(PickupType.Armor, 19.5f, 5.5f, 30));
+        return pickups;
     }
         //death screen
         static void DrawDeathScreen()
