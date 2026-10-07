@@ -181,4 +181,23 @@ public static void Draw()
         ));
          Weapons[1].Owned = true;
     }
+    //damage to player function
+    public static void DamagePlayer(int amount)
+    {
+        if (amount <= 0) return;
+
+        if (Armor > 0)
+        {
+            int absorbed = Math.Min(Armor, amount);
+            Armor -= absorbed;
+            amount -= absorbed;
+        }
+        if(amount > 0)
+        {
+            Health -= amount;
+            if (Health < 0) Health = 0;
+        }
+    }
+    
 } 
+

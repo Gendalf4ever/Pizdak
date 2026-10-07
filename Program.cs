@@ -5,7 +5,7 @@ class Program
 {
     const int MapWidth = 24;
     const int MapHeight = 24;
-    //const int TileSize = 20;
+
 
      // 1 — стена, 0 — пусто
     static int[,] map = new int[MapWidth, MapHeight]
@@ -123,12 +123,7 @@ class Program
             float angle = 0;
             if (Raylib.IsKeyDown(KeyboardKey.Left)) angle -= rotSpeed;
             if (Raylib.IsKeyDown(KeyboardKey.Right)) angle += rotSpeed;
-            /*
-            if (Raylib.IsKeyPressed(KeyboardKey.One))   Hud.Health = 100;  
-            if (Raylib.IsKeyPressed(KeyboardKey.Two))   Hud.Health = 40;   
-            if (Raylib.IsKeyPressed(KeyboardKey.Three)) Hud.Health = 0;    
-            if (Raylib.IsKeyPressed(KeyboardKey.Four))  Hud.Health = 25;   
-            */
+
             Vector2 mouseDelta = Raylib.GetMouseDelta();
             angle += mouseDelta.X * mouseSens;
 
@@ -180,26 +175,24 @@ class Program
                 bool attacking = e.Update(posX, posY, map, dt);
                 if (attacking)
                 {
-                    Hud.Health -= e.Damage;
-                    if (Hud.Health < 0) Hud.Health = 0;
-                    Console.WriteLine($"Урон {e.Damage}  Здоровье {Hud.Health}");
+                    Hud.DamagePlayer(e.Damage);
                 }
             }
                //pickups
             foreach (var p in pickups)
-                {
-            if (p.Taken) continue;
-            float dx = p.X - posX;
-            float dy = p.Y - posY;
-            float dist = MathF.Sqrt(dx * dx + dy* dy);
-            if (dist < 0.5f)
             {
-                if (p.Apply())
+                if (p.Taken) continue;
+                float dx = p.X - posX;
+                float dy = p.Y - posY;
+                float dist = MathF.Sqrt(dx * dx + dy* dy);
+                if (dist < 0.5f)
                 {
-                    Console.WriteLine($"Подобрано: {p.Type} +{p.Amount}");
+                    if (p.Apply())
+                    {
+                        Console.WriteLine($"Подобрано: {p.Type} +{p.Amount}");
+                    }
                 }
             }
-                 }
             //shooting
             if(Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
