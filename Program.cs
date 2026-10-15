@@ -25,7 +25,7 @@ class Program
             }
             return map; 
         }
- 
+
         string text = File.ReadAllText(fileName);
         int x = 0, y = 0;
         
@@ -113,27 +113,22 @@ class Program
         return level;
     }
 
-    static void Main()
+    public static void StartGame(int startLevelIndex)
     {
-        Raylib.InitWindow(1280,720, "Game");
-        Hud.Load();
-        Raylib.SetTargetFPS(60);
         Raylib.DisableCursor();
 
-        int currentLevelIndex = 1;
+        int currentLevelIndex = startLevelIndex;
 
-        LevelData currentLevel = LoadLevel(currentLevelIndex);
-        int[,] map = currentLevel.Map;
-        float posX = currentLevel.StartX;
-        float posY = currentLevel.StartY;
-        List<Enemy> enemies = currentLevel.Enemies;
-        List<Pickup> pickups = currentLevel.Pickups;
+        // Инициализируем переменные пустыми, они заполнятся при старте уровня
+        LevelData currentLevel = null;
+        int[,] map = null;
+        float posX = 0f;
+        float posY = 0f;
+        List<Enemy> enemies = null;
+        List<Pickup> pickups = null;
 
-        //sight direction
         float dirX = 1.0f;
         float dirY = 0.0f;
-
-        //fov
         float planeX = 0.0f;
         float planeY = 0.66f;
 
@@ -152,6 +147,33 @@ class Program
         bool isDead = false;
         bool isLevelComplete = false;
 
+        void StartLevel(int levelToLoad)
+        {
+            currentLevelIndex = levelToLoad;
+            Hud.Health = 100;
+            Hud.Ammo = 50;
+            Hud.Armor = 0;
+            
+            currentLevel = LoadLevel(currentLevelIndex);
+            map = currentLevel.Map;
+            posX = currentLevel.StartX;
+            posY = currentLevel.StartY;
+            enemies = currentLevel.Enemies;
+            pickups = currentLevel.Pickups;
+
+            dirX = 1.0f;
+            dirY = 0.0f;
+            planeX = 0.0f;
+            planeY = 0.66f;
+
+            isDead = false;
+            isLevelComplete = false;
+            shotTimer = 0f;
+        }
+
+        // load selected level
+        StartLevel(currentLevelIndex);
+
         while(!Raylib.WindowShouldClose())
         {
             //check if player is alive
@@ -159,23 +181,7 @@ class Program
 
             if(isDead && Raylib.IsKeyPressed(KeyboardKey.R))
             {
-                Hud.Health = 100;
-                Hud.Ammo = 50;
-                Hud.Armor = 0;
-                
-                currentLevel = LoadLevel(currentLevelIndex);
-                map = currentLevel.Map;
-                posX = currentLevel.StartX;
-                posY = currentLevel.StartY;
-                enemies = currentLevel.Enemies;
-                pickups = currentLevel.Pickups;
-
-                dirX = 1.0f;
-                dirY = 0.0f;
-                planeX = 0.0f;
-                planeY = 0.66f;
-                isDead = false;
-                isLevelComplete = false;
+                StartLevel(currentLevelIndex);
             }
 
             if (!isDead && !isLevelComplete)
@@ -200,17 +206,13 @@ class Program
                     
                     if (!File.Exists(Path.Combine("maps", $"level{currentLevelIndex}.txt")))
                     {
-                        break; 
+                        Raylib.EnableCursor(); 
+                        return; 
                     }
-
-                    Hud.Health = 100;
-                    currentLevel = LoadLevel(currentLevelIndex); 
-                    map = currentLevel.Map;
-                    posX = currentLevel.StartX;
-                    posY = currentLevel.StartY;
-                    enemies = currentLevel.Enemies;
-                    pickups = currentLevel.Pickups;
-                    isLevelComplete = false;
+                    else
+                    {
+                        StartLevel(currentLevelIndex);
+                    }
                 }
                 continue; 
             }
@@ -395,7 +397,7 @@ class Program
                     if (map[mapX, mapY] == 1) break; 
                 }
 
-                float perpWallDist = 100.0f; // <-- Фикс: если луч улетел за карту, рисуем его очень далеко, чтобы не перекрывал экран
+                float perpWallDist = 100.0f; 
                 if (mapX >= 0 && mapX < MapWidth && mapY >= 0 && mapY < MapHeight)
                 {
                     if (side == 0) perpWallDist = sideDistX - deltaDistX;
@@ -443,8 +445,9 @@ class Program
             if (isDead) DrawDeathScreen();
             Raylib.EndDrawing();
         }
-        Hud.Unload();
-        Raylib.CloseWindow();
+        
+        // if esc pressed in the game
+        Raylib.EnableCursor();
     }
 
     static void CheckExitConditions(ref bool isComplete, ExitCondition condition, float posX, float posY, int[,] map, List<Enemy> enemies)
