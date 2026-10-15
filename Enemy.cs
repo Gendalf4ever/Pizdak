@@ -1,7 +1,7 @@
 using Raylib_cs;
 using System.Numerics;
 
-class Enemy
+public class Enemy
 {
     public float X;
     public float Y;

@@ -12,10 +12,12 @@ public static int MaxAmmo = 200;
 public static List<Weapon> Weapons = new List<Weapon>();
 public static int CurrentWeaponIndex = 0;
 public static Weapon CurrentWeapon => Weapons[CurrentWeaponIndex];
+public static bool HasKey = false;
 //pizdak textures
 static Texture2D _faceNormal;
 static Texture2D _faceHurt;
 static Texture2D _faceDead;
+
 
 public static void Load()
     {

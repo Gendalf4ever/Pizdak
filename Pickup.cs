@@ -1,12 +1,13 @@
 using Raylib_cs;
 
-enum PickupType
+public enum PickupType
 {
     Ammo,
     Health,
-    Armor
+    Armor,
+    Key
 }
-class Pickup
+public class Pickup
 {
     public PickupType Type;
     public float X;
@@ -29,6 +30,7 @@ class Pickup
             PickupType.Ammo => new Color((byte)230, (byte)220, (byte)60, (byte)255),
             PickupType.Health => new Color((byte)220, (byte)60, (byte)60, (byte)255),
             PickupType.Armor => new Color((byte)60, (byte)180, (byte)80, (byte)255),
+            PickupType.Key => Color.Gold,
             _  => Color.White
         };
     }
@@ -54,6 +56,9 @@ class Pickup
                 Hud.Armor += Amount;
                 if (Hud.Armor > 100) Hud.Armor = 100;
                 break;
+            case PickupType.Key:
+            Hud.HasKey = true;
+            break;
         }
         Taken = true;
         return true;
